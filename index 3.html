@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daimos Nano✨</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    iframe {
+        width: 100%;
+        height: 500px; /* Adjust height as needed */
+        border: 1px solid #ccc;
+        margin-top: 10px;
+        border-radius: 20px;
+        box-shadow: 10px 10px 20px;
+    }
+</style>
+</head>
+<body>
+<center>
+<h1>Daimos Nano✨</h1>
+<input type="text" id="userInput">
+<button onclick="compareWords()">Daimos it!</button>
+<button onclick="startSpeechRecognition()">🎙️</button> <!-- New button for speech recognition -->
+  <br><br>
+<div id="output"></div>
+<br>
+</center>
+
+<script>
+    function compareWords() {
+        var userInput = document.getElementById("userInput").value;
+        // Remove punctuation and symbols
+        var cleanedInput = userInput.replace(/[^\w\s]/g, '');
+        // Convert input string to lowercase and split into individual words
+        var inputWords = cleanedInput.toLowerCase().split(/\s+/);
+
+        // Word database with responses and search keywords
+        var database = {
+            "hello": ["Hi!", "Hello there!", "Hey!"],
+            "sup": ["Hi!", "Hello there!", "Hey!"],
+            "hi": ["Hey!", "Hi there!", "Hello!"],
+            "hey": ["Hey!", "Hi there!", "Hello!"],
+            "howdy": ["Howdy!", "Hi there!", "Hello!"],
+            "good morning": ["Good morning!", "Have a great day!", "Morning!"],
+            "good afternoon": ["Good afternoon!", "Hope you're having a good day!", "Afternoon!"],
+            "good evening": ["Good evening!", "How was your day?", "Evening!"],
+            "goodbye": ["Goodbye!", "See you later!", "Take care!"],
+            "bye": ["Goodbye!", "Take care!", "See you later!"],
+            "thanks": ["You're welcome!", "No problem!", "Glad to help!"],
+            "thank you": ["You're welcome!", "No problem!", "Glad to help!"],
+            "how are you?": ["I'm doing well, thank you!", "Feeling good, how about you?", "Great, thanks for asking!"],
+            "what's up?": ["Not much, just chilling.", "Just here, what about you?", "Just enjoying the day."],
+            "how's it going?": ["It's going well, thanks!", "Pretty good, and you?", "Can't complain, how about yourself?"],
+            "what do you like to do?": ["I enjoy chatting with you!", "I like helping people out.", "I'm here to assist you!"],
+            "tell me a joke": ["Why don't scientists trust atoms? Because they make up everything!", "What do you get when you cross a snowman and a vampire? Frostbite!", "Why did the scarecrow win an award? Because he was outstanding in his field!"],
+            "tell me something interesting": ["Did you know that honey never spoils?", "The Eiffel Tower can be 15 cm taller during the summer due to thermal expansion of the iron!", "The shortest war in history lasted only 38 minutes between Britain and Zanzibar in 1896!"],
+            "tell me a fun fact": ["The average person spends six months of their life waiting for a red light to turn green!", "Bananas are berries but strawberries aren't!", "A group of flamingos is called a flamboyance!"],
+            "what's your favorite food?": ["I don't eat, but I hear good things about pizza!", "My favorite food is binary code!", "I'm a fan of byte-sized snacks!"],
+            "what's up?": ["Not much, just chilling.", "Just here, what about you?", "Just enjoying the day."],
+            "how's it going?": ["It's going well, thanks!", "Pretty good, and you?", "Can't complain, how about yourself?"],
+            "goodbye": ["Goodbye!", "See you later!", "Take care!"],
+            "thanks": ["You're welcome!", "No problem!", "Glad to help!"],
+            "I feel great": ["That's wonderful!", "Great to hear!", "I'm happy for you!"],
+            "I feel sad": ["I'm here if you need to talk.", "It's okay to feel sad sometimes.", "Sending you virtual hugs!"],
+             "I feel terrible": ["I'm here if you need to talk.", "It's okay to feel sad sometimes.", "Sending you virtual hugs!"],
+            "I feel tired": ["Maybe you need some rest?", "Take a break if you can.", "Don't forget to recharge!"],
+            "I feel excited": ["That's fantastic!", "What's got you feeling excited?", "Enjoy the moment!"],
+            "I feel anxious": ["Take a deep breath, you've got this.", "Let's focus on things you can control.", "It's okay to feel anxious, you're not alone."],
+            "I feel stressed": ["Remember to take breaks and relax.", "Let's find ways to de-stress.", "Take one step at a time, you'll get through this!"],
+            "I feel bored": ["Let's find something fun to do!", "How about trying something new?", "Boredom is an opportunity for creativity!"],
+            "I feel grateful": ["Gratitude is a wonderful feeling!", "What are you grateful for today?", "It's great to appreciate the good things in life!"],
+            "I feel confused": ["It's okay not to have all the answers.", "Let's break it down step by step.", "Seeking clarity is the first step to understanding!"],
+             "is it": ["Yeah!"],
+             "really": ["Of course!", "Yeah!", "Definitely!"],
+             "cool": ["It sure is!", "Yeah it's radical!"],
+             "Likewise": ["Nice!", "Cool!"],
+             "nice": ["Really?", "Thanks!"],
+             "yeah": ["Alright!", "Ok!"],
+             "i feel the same": ["Cool!", "That's good!"]
+             
+        };
+
+
+        var maxMatchCount = 0;
+        var response = '';
+
+        // Iterate through each phrase in the database
+        for (var key in database) {
+            var dbWords = key.split(/\s+/);
+            var matchCount = 0;
+            // Count the number of words in user input that match with words in the database phrase
+            for (var word of inputWords) {
+                if (dbWords.includes(word)) {
+                    matchCount++;
+                }
+            }
+            // Update response if this phrase has more matching words
+            if (matchCount > maxMatchCount) {
+                maxMatchCount = matchCount;
+                // Randomly select a response from the pool of responses
+                response = database[key][Math.floor(Math.random() * database[key].length)];
+            }
+        }
+
+        // Check if the input starts with "who made"
+        if (userInput.match(/^(who is|who are|what is|what are|tell me about|who made|why are)/i)) {
+            // Extract the query from the input
+            var query = encodeURIComponent(userInput.replace(/^(who is|who are|what is|what are|tell me about|who made|why are)/i, ''));
+            // Call Wikipedia API to get the summary
+            fetch("https://en.wikipedia.org/api/rest_v1/page/summary/" + query)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Summary not available');
+                    }
+                })
+                .then(data => {
+                    // If summary is available, display it
+                    response = data.extract;
+                    displayResponse(response, userInput);
+                })
+                .catch(error => {
+                    // If summary is not available, perform Bing search
+                    response = "https://www.bing.com/search?q=" + query;
+                    displayResponse(response);
+                });
+        } else if (userInput.match(/^how to/i)) {
+            // Extract the query from the input
+            var query = encodeURIComponent(userInput.replace(/^how to/i, ''));
+            response = "https://www.bing.com/search?q=" + query;
+            displayResponse(response);
+        } else if (userInput.match(/^(.*) in (.*)/i)) {
+            var query = encodeURIComponent(userInput);
+            response = "https://www.bing.com/search?q=" + query;
+            displayResponse(response);
+        } else if (userInput.match(/^(.*) to (.*)/i)) {
+          var query = encodeURIComponent(userInput);
+          response = "https://www.bing.com/search?q=" + query;
+          displayResponse(response);
+        } else {
+            displayResponse(response, userInput);
+        }
+
+
+    }
+
+    function startSpeechRecognition() {
+        var recognition = new webkitSpeechRecognition() || new SpeechRecognition(); // Cross-browser support
+        recognition.lang = 'en-US';
+
+        recognition.onresult = function(event) {
+            var result = event.results[0][0].transcript;
+            document.getElementById('userInput').value = result;
+            compareWords();
+        };
+
+        recognition.start();
+    }
+    
+    // Function to display response
+    function displayResponse(response, userInput) {
+        var outputElement = document.getElementById("output");
+        if (response !== '') {
+            // Check if response is a URL
+            if (isValidURL(response)) {
+                // If it's a URL, display it in an iframe
+                outputElement.innerHTML = '<iframe src="' + response + '"></iframe>';
+            } else {
+                // If it's not a URL, display it as text
+                outputElement.textContent = response;
+            }
+        } else {
+            outputElement.textContent = 'Pardon?';
+        }
+    }
+
+    // Function to check if a string is a valid URL
+    function isValidURL(str) {
+        var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+          '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+          '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+          '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+          '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+          '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+        return !!pattern.test(str);
+    }
+</script>
+</body>
+</html>
