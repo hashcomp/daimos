@@ -119,9 +119,9 @@
         }
 
         // Check if the input starts with "who made"
-        if (userInput.match(/^(who is|who are|what is|what are|tell me about|who made|why are)/i)) {
+        if (userInput.match(/^(who is|who are|what does|what is|what are|tell me about|who made|why are)/i)) {
             // Extract the query from the input
-            var query = encodeURIComponent(userInput.replace(/^(who is|who are|what is|what are|tell me about|who made|why are)/i, ''));
+            var query = encodeURIComponent(userInput.replace(/^(who is|who are|what does|what is|what are|tell me about|who made|why are)/i, ''));
             // Call Wikipedia API to get the summary
             fetch("https://en.wikipedia.org/api/rest_v1/page/summary/" + query)
                 .then(response => {
