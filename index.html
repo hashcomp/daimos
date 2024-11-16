@@ -44,14 +44,24 @@
 
 <script>
     function compareWords() {
-        var userInput = document.getElementById("userInput").value;
-        // Remove punctuation and symbols
-        var cleanedInput = userInput.replace(/[^\w\s]/g, '');
-        // Convert input string to lowercase and split into individual words
-        var inputWords = cleanedInput.toLowerCase().split(/\s+/);
+    var userInput = document.getElementById("userInput").value;
 
-        // Word database with responses and search keywords
-        var database = {
+    // Check if the input is a mathematical expression
+    if (isMathExpression(userInput)) {
+        try {
+            var result = eval(userInput); // Evaluate the mathematical expression
+            displayResponse(`The result is: ${result}`);
+        } catch (error) {
+            displayResponse('Invalid mathematical expression.');
+        }
+        return;
+    }
+
+    // Rest of your code...
+    var cleanedInput = userInput.replace(/[^\w\s]/g, '');
+    var inputWords = cleanedInput.toLowerCase().split(/\s+/);
+
+    var database = {
             "hello": ["Hi!", "Hello there!", "Hey!"],
             "sup": ["Hi!", "Hello there!", "Hey!"],
             "hi": ["Hey!", "Hi there!", "Hello!"],
@@ -96,70 +106,55 @@
              
         };
 
+    var maxMatchCount = 0;
+    var response = '';
 
-        var maxMatchCount = 0;
-        var response = '';
-
-        // Iterate through each phrase in the database
-        for (var key in database) {
-            var dbWords = key.split(/\s+/);
-            var matchCount = 0;
-            // Count the number of words in user input that match with words in the database phrase
-            for (var word of inputWords) {
-                if (dbWords.includes(word)) {
-                    matchCount++;
-                }
-            }
-            // Update response if this phrase has more matching words
-            if (matchCount > maxMatchCount) {
-                maxMatchCount = matchCount;
-                // Randomly select a response from the pool of responses
-                response = database[key][Math.floor(Math.random() * database[key].length)];
+    for (var key in database) {
+        var dbWords = key.split(/\s+/);
+        var matchCount = 0;
+        for (var word of inputWords) {
+            if (dbWords.includes(word)) {
+                matchCount++;
             }
         }
-
-        // Check if the input starts with "who made"
-        if (userInput.match(/^(who is|who are|what does|what is|what are|tell me about|who made|why are)/i)) {
-            // Extract the query from the input
-            var query = encodeURIComponent(userInput.replace(/^(who is|who are|what does|what is|what are|tell me about|who made|why are)/i, ''));
-            // Call Wikipedia API to get the summary
-            fetch("https://en.wikipedia.org/api/rest_v1/page/summary/" + query)
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error('Summary not available');
-                    }
-                })
-                .then(data => {
-                    // If summary is available, display it
-                    response = data.extract;
-                    displayResponse(response, userInput);
-                })
-                .catch(error => {
-                    // If summary is not available, perform Bing search
-                    response = "https://www.bing.com/search?q=" + query;
-                    displayResponse(response);
-                });
-        } else if (userInput.match(/^how to/i)) {
-            // Extract the query from the input
-            var query = encodeURIComponent(userInput.replace(/^how to/i, ''));
-            response = "https://www.bing.com/search?q=" + query;
-            displayResponse(response);
-        } else if (userInput.match(/^(.*) in (.*)/i)) {
-            var query = encodeURIComponent(userInput);
-            response = "https://www.bing.com/search?q=" + query;
-            displayResponse(response);
-        } else if (userInput.match(/^(.*) to (.*)/i)) {
-          var query = encodeURIComponent(userInput);
-          response = "https://www.bing.com/search?q=" + query;
-          displayResponse(response);
-        } else {
-            displayResponse(response, userInput);
+        if (matchCount > maxMatchCount) {
+            maxMatchCount = matchCount;
+            response = database[key][Math.floor(Math.random() * database[key].length)];
         }
-
-
     }
+
+    if (userInput.match(/^(who is|who are|what does|what is|what are|tell me about|who made|why are)/i)) {
+        var query = encodeURIComponent(userInput.replace(/^(who is|who are|what does|what is|what are|tell me about|who made|why are)/i, ''));
+        fetch("https://en.wikipedia.org/api/rest_v1/page/summary/" + query)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Summary not available');
+                }
+            })
+            .then(data => {
+                response = data.extract;
+                displayResponse(response, userInput);
+            })
+            .catch(error => {
+                response = "https://www.bing.com/search?q=" + query;
+                displayResponse(response);
+            });
+    } else if (userInput.match(/^how to/i)) {
+        var query = encodeURIComponent(userInput.replace(/^how to/i, ''));
+        response = "https://www.bing.com/search?q=" + query;
+        displayResponse(response);
+    } else {
+        displayResponse(response, userInput);
+    }
+}
+
+// Function to check if the input is a mathematical expression
+function isMathExpression(input) {
+    // Matches basic math expressions (e.g., 2+2, 3.14 * 2)
+    return /^[0-9+\-*/().\s]+$/.test(input.trim());
+}
 
     function startSpeechRecognition() {
         var recognition = new webkitSpeechRecognition() || new SpeechRecognition(); // Cross-browser support
